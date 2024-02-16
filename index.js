@@ -49,7 +49,7 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
     if (!user) return res.status(401).json({ message: 'Invalid username or password' });
-
+-
     bcrypt.compare(password, user.password, (err, result) => {
         if (err || !result) return res.status(401).json({ message: 'Invalid username or password' });
 
@@ -114,6 +114,25 @@ app.post('/sell', async (req, res) => {
     }
     
 });
+
+app.put('/sell/:id', async (req, res) => {
+    //change the  fiield active value 
+    const { id } = req.params;
+    const { active } = req.body;
+    try {
+        const sell = await Sell.findById(id);
+        if (!sell) {
+            return res.status(404).json({ message: 'Sell not found' });
+        }
+        sell.active = active;
+        await sell.save();
+        res.json({ message: 'Sell updated successfully' });
+    } catch (error) {
+        console.error('Error updating sell:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 
 
 // add buy arrticles to the database
