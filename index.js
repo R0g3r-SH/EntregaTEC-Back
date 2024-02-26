@@ -11,6 +11,8 @@ import dotenv from 'dotenv';
 //import { json } from 'body-parser';
 dotenv.config();
 
+//app use body parser
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,8 +30,22 @@ const userSchema = new mongoose.Schema({
     password: String
 });
 
+const sellSchema = new mongoose.Schema({
+    article: String,
+    price: Number,
+    stock: Number,
+    user_that_sell_id: String,
+    active: Boolean,
+    img_url: String,
+    descripcion: String,
+    ubicacion: String
+});
+
 const User = mongoose.model('User', userSchema);
 
+const Sell = mongoose.model('Sell', sellSchema);
+
+app.use(bodyParser.json());
 app.use(bodyParser.json());
 
 // Authentication middleware
@@ -91,7 +107,7 @@ app.post('/register', async (req, res) => {
 // add sell arrticles to the database
 
 app.post('/sell', async (req, res) => {
-    const { article, price, stock, user_that_sell_id , img_url , descripcion } = req.body;
+    const { article, price, stock, user_that_sell_id , img_url , descripcion ,ubicacion} = req.body;
     try {
         // Create a new delivery
         const newSell = new Sell({
