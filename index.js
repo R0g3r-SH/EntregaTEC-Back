@@ -216,6 +216,32 @@ app.post('/buy', async (req, res) => {
     }
 
 });
+//edit a sell entry
+app.put('/sell/:id', async (req, res) => {
+    const { id } = req.params;
+    const { article, price, stock, user_that_sell_id, active, img_url, descripcion, ubicacion } = req.body;
+    try {
+        const sell = await Sell.findById(id);
+        if (!sell) {
+            return res.status(404).json({ message: 'Sell not found' });
+        }
+        sell.article = article;
+        sell.price = price;
+        sell.stock = stock;
+        sell.user_that_sell_id = user_that_sell_id;
+        sell.active = active;
+        sell.img_url = img_url;
+        sell.descripcion = descripcion;
+        sell.ubicacion = ubicacion;
+        await sell.save();
+        res.json({ message: 'Sell updated successfully' });
+    } catch (error) {
+        console.error('Error updating sell:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
 
 // Get all sell entries
 app.get('/sell', async (req, res) => {
