@@ -103,9 +103,7 @@ app.post('/register', async (req, res) => {
     }
 });
 
-
 // add sell arrticles to the database
-
 app.post('/sell', async (req, res) => {
     const { article, price, stock, user_that_sell_id , img_url , descripcion ,ubicacion} = req.body;
     try {
@@ -130,7 +128,6 @@ app.post('/sell', async (req, res) => {
     }
     
 });
-
 
 // Get all sell entries by user id
 app.get('/sell/:user_id', async (req, res) => {
@@ -159,7 +156,7 @@ app.get('/sell/:id', async (req, res) => {
     }
 });
 
-app.put('/sell/:id', async (req, res) => {
+app.put('/sell_status/:id', async (req, res) => {
     //change the  fiield active value 
     const { id } = req.params;
     const { active } = req.body;
@@ -176,7 +173,6 @@ app.put('/sell/:id', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-
 
 // add buy arrticles to the database
 app.post('/buy', async (req, res) => {
@@ -247,6 +243,7 @@ app.get('/buy/:user_id', async (req, res) => {
     }
     
 });
+
 
 async function createRequest() {
 
