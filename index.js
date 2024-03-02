@@ -131,6 +131,34 @@ app.post('/sell', async (req, res) => {
     
 });
 
+
+// Get all sell entries by user id
+app.get('/sell/:user_id', async (req, res) => {
+    const { user_id } = req.params;
+    try {
+        const sells = await Sell.find({ user_that_sell_id: user_id });
+        res.json(sells);
+    } catch (error) {
+        console.error('Error getting sells:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Get sell by id
+app.get('/sell/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const sell = await Sell.findById(id);
+        if (!sell) {
+            return res.status(404).json({ message: 'Sell not found' });
+        }
+        res.json(sell);
+    } catch (error) {
+        console.error('Error getting sell:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 app.put('/sell/:id', async (req, res) => {
     //change the  fiield active value 
     const { id } = req.params;
@@ -148,7 +176,6 @@ app.put('/sell/:id', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-
 
 
 // add buy arrticles to the database
@@ -220,7 +247,6 @@ app.get('/buy/:user_id', async (req, res) => {
     }
     
 });
-
 
 async function createRequest() {
 
