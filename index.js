@@ -242,7 +242,6 @@ app.put('/sell/:id', async (req, res) => {
 });
 
 
-
 // Get all sell entries
 app.get('/sell', async (req, res) => {
     try {
@@ -269,6 +268,23 @@ app.get('/buy/:user_id', async (req, res) => {
     }
     
 });
+
+//delete a sell entry
+app.delete('/sell/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const sell = await Sell.findById(id);
+        if (!sell) {
+            return res.status(404).json({ message: 'Sell not found' });
+        }
+        await sell.deleteOne();
+        res.json({ message: 'Sell deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting sell:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 
 
 async function createRequest() {
