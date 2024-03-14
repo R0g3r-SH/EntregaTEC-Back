@@ -251,17 +251,17 @@ app.put('/sell/:id', async (req, res) => {
 
 // Get all sell entries
 app.get('/sell', async (req, res) => {
+    
     try {
-        const sells = await Sell.find();
-        res.json(sells);
 
-        ///return only the sells whit active status 
         const sells = await Sell.find({active:true});
         res.json(sells);
 
     } catch (error) {
+
         console.error('Error getting sells:', error);
         res.status(500).json({ message: 'Internal server error' });
+    
     }
 
 });
