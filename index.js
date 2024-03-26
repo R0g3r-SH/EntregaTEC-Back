@@ -44,7 +44,10 @@ const sellSchema = new mongoose.Schema({
 const orderSchema = new mongoose.Schema({
     user_that_sell_id: String,
     user_that_bought_id: String,
-    ubication: String,
+    ubication:{
+        ubication_to_deliver: String,
+        ubicacion_to_pickup: String,
+    },
     total: Number,
     products: [sellSchema], // Embedding sellSchema as a sub-document array,
     delivery_info: {
@@ -313,10 +316,9 @@ app.delete('/sell/:id', async (req, res) => {
 
 });
 
-
 app.post('/create_order', async (req, res) => {
 
-    const {ubication, total, products , user_that_sell_id } = req.body;
+    const {total, products , user_that_sell_id ,  ubication_to_deliver , ubicacion_to_pickup} = req.body;
 
     try {
         // Create a new order
@@ -335,13 +337,18 @@ app.post('/create_order', async (req, res) => {
 
         //validate if the products exists
         if (products.length == 0) {
+
             return res.status(404).json({ message: 'Products not found' });
+
         }
         
         const newOrder = new Order({
             user_that_sell_id,
             user_that_bought_id: null,
-            ubication,
+            ubication: {
+                ubication_to_deliver,
+                ubicacion_to_pickup
+            },
             total,
             products,
             delivery_info: {
@@ -360,8 +367,6 @@ app.post('/create_order', async (req, res) => {
 
     }
 });
+
 // Get all buy entries
-
-
-
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
