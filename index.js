@@ -322,7 +322,14 @@ app.post('/create_order', async (req, res) => {
 
     try {
         // Create a new order
+        if (total == 0) {
+            return res.status(404).json({ message: 'Total can not be 0' });
+        }
+
+
         const secret_code = Math.random().toString(36).substring(7);
+
+
 
         try {
             const user = await User.findById(user_that_sell_id);
@@ -337,10 +344,10 @@ app.post('/create_order', async (req, res) => {
 
         //validate if the products exists
         if (products.length == 0) {
-
             return res.status(404).json({ message: 'Products not found' });
-
         }
+
+
         
         const newOrder = new Order({
             user_that_sell_id,
