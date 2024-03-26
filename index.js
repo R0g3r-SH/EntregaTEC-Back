@@ -6,7 +6,7 @@ import mongoose from 'mongoose';
 import axios from 'axios';
 import { OpenAI } from 'openai';
 
-const client = new OpenAI({apiKey:'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'});
+const client = new OpenAI({ apiKey: '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' });
 import dotenv from 'dotenv';
 //import { json } from 'body-parser';
 dotenv.config();
@@ -41,9 +41,26 @@ const sellSchema = new mongoose.Schema({
     ubicacion: String
 });
 
-const User = mongoose.model('User', userSchema);
+const orderSchema = new mongoose.Schema({
+    user_that_sell_id: String,
+    user_that_bought_id: String,
+    ubication: String,
+    total: Number,
+    products: [sellSchema], // Embedding sellSchema as a sub-document array,
+    delivery_info: {
+        user_that_deliver_id: String,
+    },
+    status: {
+        type: String,
+        enum: ['pending', 'completed', 'cancelled', 'on the way'], // Set the enum values
+        default: 'pending' // Set a default value
+    },
+    secret_code: String
+});
 
+const User = mongoose.model('User', userSchema);
 const Sell = mongoose.model('Sell', sellSchema);
+const Order = mongoose.model('Order', orderSchema);
 
 app.use(bodyParser.json());
 app.use(bodyParser.json());
@@ -65,12 +82,12 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username });
     if (!user) return res.status(401).json({ message: 'Invalid username or password' });
--
-    bcrypt.compare(password, user.password, (err, result) => {
-        if (err || !result) return res.status(401).json({ message: 'Invalid username or password' });
+    -
+        bcrypt.compare(password, user.password, (err, result) => {
+            if (err || !result) return res.status(401).json({ message: 'Invalid username or password' });
 
-        res.json({ user: user._id });
-    });
+            res.json({ user: user._id });
+        });
 });
 
 
@@ -105,7 +122,7 @@ app.post('/register', async (req, res) => {
 
 // add sell arrticles to the database
 app.post('/sell', async (req, res) => {
-    const { article, price, stock, user_that_sell_id , img_url , descripcion ,ubicacion} = req.body;
+    const { article, price, stock, user_that_sell_id, img_url, descripcion, ubicacion } = req.body;
     try {
         // Create a new delivery
         const newSell = new Sell({
@@ -113,7 +130,7 @@ app.post('/sell', async (req, res) => {
             price,
             stock,
             user_that_sell_id,
-            active : true,
+            active: true,
             img_url,
             descripcion,
             ubicacion
@@ -126,7 +143,7 @@ app.post('/sell', async (req, res) => {
         console.error('Error adding sell:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-    
+
 });
 
 // Get all sell entries by user id
@@ -177,7 +194,6 @@ app.put('/sell_status/:id', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-
 
 // add buy arrticles to the database
 app.post('/buy', async (req, res) => {
@@ -251,20 +267,16 @@ app.put('/sell/:id', async (req, res) => {
 
 // Get all sell entries
 app.get('/sell', async (req, res) => {
-    
+
     try {
-
-        const sells = await Sell.find({active:true});
+        const sells = await Sell.find({ active: true });
         res.json(sells);
-
     } catch (error) {
-
         console.error('Error getting sells:', error);
         res.status(500).json({ message: 'Internal server error' });
-    
     }
-
 });
+
 
 // Get all buy entries by user id
 app.get('/buy/:user_id', async (req, res) => {
@@ -278,13 +290,13 @@ app.get('/buy/:user_id', async (req, res) => {
         console.error('Error getting buys:', error);
         res.status(500).json({ message: 'Internal server error' });
     }
-    
+
 });
 
 
 //delete a sell entry
 app.delete('/sell/:id', async (req, res) => {
-    
+
     const { id } = req.params;
 
     try {
@@ -301,6 +313,54 @@ app.delete('/sell/:id', async (req, res) => {
 
 });
 
+
+app.post('/create_order', async (req, res) => {
+
+    const {ubication, total, products , user_that_sell_id } = req.body;
+
+    try {
+        // Create a new order
+        const secret_code = Math.random().toString(36).substring(7);
+
+        try {
+            const user = await User.findById(user_that_sell_id);
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' });
+            }
+
+        } catch (error) {
+            console.error('Error adding order:', error);
+            res.status(500).json({ message: 'Internal server error' });
+        }
+
+        //validate if the products exists
+        if (products.length == 0) {
+            return res.status(404).json({ message: 'Products not found' });
+        }
+        
+        const newOrder = new Order({
+            user_that_sell_id,
+            user_that_bought_id: null,
+            ubication,
+            total,
+            products,
+            delivery_info: {
+                user_that_deliver_id: null
+            },
+            secret_code: secret_code
+        });
+        // Save the order to the database
+        await newOrder.save();
+        res.status(201).json({ message: 'Order added successfully' });
+
+    } catch (error) {
+
+        console.error('Error adding order:', error);
+        res.status(500).json({ message: 'Internal server error' });
+
+    }
+});
+// Get all buy entries
 
 
 
