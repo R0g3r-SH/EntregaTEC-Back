@@ -368,5 +368,19 @@ app.post('/create_order', async (req, res) => {
     }
 });
 
+app.get('/pending_orders', async (req, res) => {
+
+    try {
+        const orders = await Order.find({ status: 'pending' });
+        res.json(orders);
+    }
+    catch (error) {
+        console.error('Error getting orders:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+);
+
+
 // Get all buy entries
 app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
