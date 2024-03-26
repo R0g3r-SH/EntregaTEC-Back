@@ -318,7 +318,7 @@ app.delete('/sell/:id', async (req, res) => {
 
 app.post('/create_order', async (req, res) => {
 
-    const {total, products , user_that_sell_id ,  ubication_to_deliver , ubication_to_pickup} = req.body;
+    const {total, products , user_that_sell_id ,  ubication_to_deliver , ubication_to_pickup ,user_that_bought_id} = req.body;
 
     try {
         // Create a new order
@@ -351,10 +351,10 @@ app.post('/create_order', async (req, res) => {
         
         const newOrder = new Order({
             user_that_sell_id,
-            user_that_bought_id: null,
+            user_that_bought_id,
             ubication: {
                 ubication_to_deliver,
-                ubicacion_to_pickup
+                ubication_to_pickup
             },
             total,
             products,
