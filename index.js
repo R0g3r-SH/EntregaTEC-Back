@@ -12,8 +12,6 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 //app use body parser
-
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -66,6 +64,7 @@ const Sell = mongoose.model('Sell', sellSchema);
 const Order = mongoose.model('Order', orderSchema);
 
 app.use(bodyParser.json());
+
 app.use(bodyParser.json());
 
 // Authentication middleware
@@ -92,7 +91,6 @@ app.post('/login', async (req, res) => {
             res.json({ user: user._id });
         });
 });
-
 
 // Add this route for user registration
 app.post('/register', async (req, res) => {
@@ -241,7 +239,6 @@ app.post('/buy', async (req, res) => {
 
 });
 
-
 //edit a sell entry
 app.put('/sell/:id', async (req, res) => {
     const { id } = req.params;
@@ -267,7 +264,6 @@ app.put('/sell/:id', async (req, res) => {
     }
 });
 
-
 // Get all sell entries
 app.get('/sell', async (req, res) => {
 
@@ -279,7 +275,6 @@ app.get('/sell', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-
 
 // Get all buy entries by user id
 app.get('/buy/:user_id', async (req, res) => {
@@ -295,7 +290,6 @@ app.get('/buy/:user_id', async (req, res) => {
     }
 
 });
-
 
 //delete a sell entry
 app.delete('/sell/:id', async (req, res) => {
@@ -404,6 +398,29 @@ app.get('/pending_orders', async (req, res) => {
     }
 }
 );
+
+app.post('/take_order' , async (req, res) => {
+
+    const { order_id, user_that_deliver_id } = req.body;
+
+    try {
+        const order = await Order.findById(order_id);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+        order.status = 'on the way';
+        order.delivery_info.user_that_deliver_id = user_that_deliver_id;
+        await order.save();
+        res.json({ message: 'Order taken successfully' });
+
+    } catch (error) {
+        console.error('Error taking order:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+
+});
+
+
 
 
 // Get all buy entries
