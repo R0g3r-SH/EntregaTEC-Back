@@ -44,7 +44,7 @@ const sellSchema = new mongoose.Schema({
 const orderSchema = new mongoose.Schema({
     user_that_sell_id: String,
     user_that_bought_id: String,
-    ubication:{
+    ubication: {
         ubication_to_deliver: String,
         ubicacion_to_pickup: String,
     },
@@ -318,7 +318,7 @@ app.delete('/sell/:id', async (req, res) => {
 
 app.post('/create_order', async (req, res) => {
 
-    const {total, products , user_that_sell_id ,  ubication_to_deliver , ubication_to_pickup ,user_that_bought_id} = req.body;
+    const { total, products, user_that_sell_id, ubication_to_deliver, ubication_to_pickup, user_that_bought_id } = req.body;
 
     try {
         // Create a new order
@@ -328,6 +328,12 @@ app.post('/create_order', async (req, res) => {
 
 
         const secret_code = Math.random().toString(36).substring(7);
+
+        //substract the products sttock field forn the sell schema
+
+        //validate if the user exists
+
+        
 
 
 
@@ -348,7 +354,7 @@ app.post('/create_order', async (req, res) => {
         }
 
 
-        
+
         const newOrder = new Order({
             user_that_sell_id,
             user_that_bought_id,
@@ -365,6 +371,17 @@ app.post('/create_order', async (req, res) => {
         });
         // Save the order to the database
         await newOrder.save();
+
+        
+        products.map(async (product) => {
+            const sell = await Sell.findById(product._id);
+            if (!sell) {
+                return res.status(404).json({ message: 'Sell not found' });
+            }
+            sell.stock -= product.stock;
+            await sell.save();
+        });
+
         res.status(201).json({ message: 'Order added successfully' });
 
     } catch (error) {
