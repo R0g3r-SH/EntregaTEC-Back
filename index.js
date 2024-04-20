@@ -423,7 +423,7 @@ app.post('/take_order' , async (req, res) => {
 
 });
 
-app.get('/get/take_order_by_client_id/:clientId' , async(req ,res) => {
+app.get('/active_orders_by_client_id/:clientId' , async(req ,res) => {
     
     const user_that_bought_id = req.params.clientId;
 
@@ -437,8 +437,7 @@ app.get('/get/take_order_by_client_id/:clientId' , async(req ,res) => {
 
 })
 
-
-app.get('get/take_order_by_client_id/:deliverId' ,  async(req ,res) => {
+app.get('/active_orders_by_client_id/:deliverId' ,  async(req ,res) => {
     
     const user_that_deliver_id = req.params.deliverId;
 
