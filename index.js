@@ -8,6 +8,7 @@ import { OpenAI } from 'openai';
 
 const client = new OpenAI({ apiKey: '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' });
 import dotenv from 'dotenv';
+import { Response } from 'openai/_shims/registry.mjs';
 //import { json } from 'body-parser';
 dotenv.config();
 
@@ -53,7 +54,7 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['pending', 'completed', 'cancelled', 'on the way'], // Set the enum values
+        enum: ['pending', 'completed', 'cancelled', 'on_the_way'], // Set the enum values
         default: 'pending' // Set a default value
     },
     secret_code: String
@@ -146,6 +147,7 @@ app.post('/sell', async (req, res) => {
     }
 
 });
+
 
 // Get all sell entries by user id
 app.get('/sell/:user_id', async (req, res) => {
@@ -386,6 +388,7 @@ app.post('/create_order', async (req, res) => {
     }
 });
 
+// trae todas las ordenes pendientes
 app.get('/pending_orders', async (req, res) => {
 
     try {
@@ -408,7 +411,7 @@ app.post('/take_order' , async (req, res) => {
         if (!order) {
             return res.status(404).json({ message: 'Order not found' });
         }
-        order.status = 'on the way';
+        order.status = 'on_the_way';
         order.delivery_info.user_that_deliver_id = user_that_deliver_id;
         await order.save();
         res.json({ message: 'Order taken successfully' });
@@ -420,6 +423,89 @@ app.post('/take_order' , async (req, res) => {
 
 });
 
+app.get('/get/take_order_by_client_id/:clientId' , async(req ,res) => {
+    
+    const user_that_bought_id = req.params.clientId;
+
+    try {
+        const orders = await Order.find({ user_that_bought_id: user_that_bought_id, status: { $ne: 'cancelled'  }});
+        res.json(orders);
+    } catch (error) {
+        console.error('Error getting orders:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+
+})
+
+
+app.get('get/take_order_by_client_id/:deliverId' ,  async(req ,res) => {
+    
+    const user_that_deliver_id = req.params.deliverId;
+
+    try {
+
+        const orders = await Order.find({ 
+            status: { $ne: 'canceled' },
+            'delivery_info.user_that_deliver_id': user_that_deliver_id
+        });
+
+        res.json(orders);
+
+    } catch (error) {
+
+        console.error('Error getting orders:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    
+    }
+
+})
+
+app.post('/cancel_order', async (req, res) => {
+
+    const { order_id } = req.body;
+
+    try {
+        const order = await Order.findById(order_id);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        order.status = 'cancelled';
+        await order.save();
+        res.json({ message: 'Order cancelled successfully' });
+
+    } catch (error) {
+        console.error('Error cancelling order:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+
+});
+
+app.post('/complete_order', async (req, res) => {
+
+    const { order_id , secret_code } = req.body;
+
+    try {
+        const order = await Order.findById(order_id);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        if (order.secret_code != secret_code) {
+            return res.status(404).json({ message: 'Invalid secret code' });
+        }
+
+        order.status = 'completed';
+        await order.save();
+        res.json({ message: 'Order completed successfully' });
+
+    } catch (error) {
+        console.error('Error completing order:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+
+});
+//por usuario otraer todas las ordenes de delivery
 
 
 
